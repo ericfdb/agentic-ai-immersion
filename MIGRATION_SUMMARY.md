@@ -101,13 +101,18 @@ response = openai_client.responses.create(conversation=conversation.id, ...)
 
 ### New Pattern
 ```python
-from agent_framework.azure import FoundryAgent
+from agent_framework.foundry import FoundryAgent
 
 agent = FoundryAgent(
     agent_name="...",
     credential=credential,
+    project_endpoint=os.environ["AI_FOUNDRY_PROJECT_ENDPOINT"],
 )
 result = await agent.run(query)
+
+# Streaming
+async for chunk in agent.run(query, stream=True):
+    print(chunk, end="")
 ```
 
 ---
@@ -156,5 +161,91 @@ The old API (`AIProjectClient`, `AzureAIProjectAgentProvider`) remains available
 2. ✅ Update `.env` configuration with unified variables
 3. ✅ Verify code interpreter capabilities work
 4. ✅ Run all three notebooks end-to-end
-5. Consider: Update additional notebooks using old API
-6. Consider: Add new examples showcasing `RawFoundryAgent` for advanced use cases
+5. ✅ Fixed notebook 11 (group chat) — rewritten with `GroupChatBuilder`
+6. ✅ Verified notebook 10 (handoff) — all APIs correct
+7. Consider: Update additional notebooks using old API
+8. Consider: Add new examples showcasing `RawFoundryAgent` for advanced use cases
+
+---
+
+## Common Mistakes & Corrections
+
+These errors were discovered during notebook testing and article review:
+
+### 1. Wrong Import Path for FoundryAgent
+```python
+# ❌ WRONG
+from agent_framework.azure import FoundryAgent
+
+# ✅ CORRECT
+from agent_framework.foundry import FoundryAgent
+```
+
+### 2. Missing `project_endpoint` Parameter
+```python
+# ❌ Incomplete — may fail if env var not set
+agent = FoundryAgent(agent_name="my-agent", credential=credential)
+
+# ✅ Explicit endpoint
+agent = FoundryAgent(
+    agent_name="my-agent",
+    credential=credential,
+    project_endpoint=os.environ["AI_FOUNDRY_PROJECT_ENDPOINT"],
+)
+```
+
+### 3. Wrong Streaming API
+```python
+# ❌ WRONG — run_stream does not exist
+async for chunk in agent.run_stream("query"):
+    print(chunk)
+
+# ✅ CORRECT
+async for chunk in agent.run("query", stream=True):
+    print(chunk, end="")
+```
+
+### 4. Wrong Environment Variable Name
+```python
+# ❌ WRONG
+os.environ["AZURE_AI_MODEL_DEPLOYMENT_NAME"]
+
+# ✅ CORRECT (for agents that use it)
+os.environ["AZURE_AI_MODEL_DEPLOYMENT_NAME"]  # This is fine for agent notebooks
+# The unified OPENAI_MODEL is for chat client notebooks
+```
+
+### 5. Missing `client_type` for Foundry Agents with Function Tools
+```python
+# ❌ Missing workaround — may fail with tool schema errors in rc6
+agent = FoundryAgent(agent_name="my-agent", credential=credential)
+
+# ✅ Include workaround class
+agent = FoundryAgent(
+    agent_name="my-agent",
+    credential=credential,
+    project_endpoint=os.environ["AI_FOUNDRY_PROJECT_ENDPOINT"],
+    client_type=FoundryAgentChatClient,  # strips tool schemas
+)
+```
+
+### 6. Handler Signature Order in Custom Executors
+```python
+# ❌ WRONG — context first
+@handler
+async def handle(self, context: WorkflowContext, message: str):
+
+# ✅ CORRECT — message first, context second
+@handler
+async def handle(self, message: str, context: WorkflowContext):
+```
+
+### 7. GroupChatBuilder and HandoffBuilder Are NOT Removed
+```python
+# ❌ WRONG assumption — these exist in agent_framework.orchestrations
+# "No direct replacement. Build a custom Executor..."
+
+# ✅ CORRECT — import from orchestrations
+from agent_framework.orchestrations import GroupChatBuilder, GroupChatState
+from agent_framework.orchestrations import HandoffBuilder, HandoffAgentUserRequest
+```

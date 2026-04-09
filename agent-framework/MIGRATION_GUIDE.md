@@ -231,8 +231,62 @@ from agent_framework.foundry import FoundryAgent
 agent = FoundryAgent(
     agent_name="my-foundry-agent",
     credential=credential,
+    project_endpoint=os.environ["AI_FOUNDRY_PROJECT_ENDPOINT"],
 )
 ```
+
+### FoundryAgent Key Parameters
+
+| Parameter | Required | Description |
+|---|---|---|
+| `agent_name` | Yes | Name of the pre-configured agent in Azure AI Foundry |
+| `credential` | Yes | Azure credential (e.g., `AzureCliCredential()`) |
+| `project_endpoint` | No* | Foundry project endpoint. *Falls back to `AI_FOUNDRY_PROJECT_ENDPOINT` env var |
+| `client_type` | No | Custom subclass of `RawFoundryAgentChatClient` for middleware/overrides |
+| `instructions` | No | Override agent instructions at runtime |
+| `tools` | No | Additional `FunctionTool` instances (only `FunctionTool` allowed) |
+
+### Agent Streaming
+
+```python
+# Non-streaming
+response = await agent.run("What is the current portfolio risk?")
+print(response)
+
+# Streaming — use stream=True (NOT run_stream)
+async for chunk in agent.run("What is the current portfolio risk?", stream=True):
+    print(chunk, end="")
+```
+
+> **⚠️ Note**: There is no `run_stream()` method. Use `agent.run(query, stream=True)`.
+
+### FoundryAgentChatClient Workaround (rc6)
+
+In `agent-framework-foundry 1.0.0rc6`, `RawFoundryAgentChatClient` may fail when tools have schemas that the Foundry agent service doesn't expect. Use a custom `client_type` to strip tool schemas:
+
+```python
+from agent_framework.foundry import FoundryAgent, RawFoundryAgentChatClient
+
+class FoundryAgentChatClient(RawFoundryAgentChatClient):
+    """Workaround for rc6: strips tool schemas before sending to Foundry."""
+
+    def _prepare_options(self, options):
+        options = super()._prepare_options(options)
+        if hasattr(options, "tools") and options.tools:
+            for t in options.tools:
+                if hasattr(t, "function") and hasattr(t.function, "parameters"):
+                    t.function.parameters = None
+        return options
+
+agent = FoundryAgent(
+    agent_name="my-agent",
+    credential=credential,
+    project_endpoint=os.environ["AI_FOUNDRY_PROJECT_ENDPOINT"],
+    client_type=FoundryAgentChatClient,
+)
+```
+
+> This workaround will likely be unnecessary in future releases.
 
 ---
 
@@ -423,14 +477,14 @@ await context.emit(WorkflowEvent.data(update))
 from agent_framework import Executor, WorkflowContext, Message, handler
 
 class MyExecutor(Executor):
-    @property
-    def name(self) -> str:
-        return "MyExecutor"
+    def __init__(self):
+        super().__init__(id="my-executor")
 
     @handler
-    async def handle(self, context: WorkflowContext, message: Message):
+    async def handle(self, message: str, context: WorkflowContext):
+        # NOTE: message parameter comes FIRST, context SECOND
         # process message, call agents, emit events
-        response = await self.some_agent.get_response([message])
+        response = await self.some_agent.run(message)
         await context.emit(WorkflowEvent.data(
             AgentResponseUpdate(text=response.text)
         ))
@@ -439,7 +493,87 @@ class MyExecutor(Executor):
 
 ---
 
-## 11. Removed Builders — Replacement Patterns
+## 11. Orchestration Builders — `agent_framework.orchestrations`
+
+`HandoffBuilder` and `GroupChatBuilder` are **NOT removed** — they moved to `agent_framework.orchestrations`.
+
+### `HandoffBuilder`
+
+```python
+from agent_framework.orchestrations import HandoffBuilder, HandoffAgentUserRequest
+
+workflow = (
+    HandoffBuilder()
+    .with_start_agent(triage_agent)
+    .add_handoff(triage_agent, [billing_agent, tech_agent])
+    .add_handoff(billing_agent, [triage_agent])
+    .add_handoff(tech_agent, [triage_agent])
+    .with_autonomous_mode(
+        agents=[billing_agent, tech_agent],
+        prompts=["Handle the customer request autonomously."],
+        turn_limits=[5],
+    )
+    .build()
+)
+
+# Streaming
+async for event in workflow.run("I need help with my bill", stream=True):
+    if event.type == "data" and isinstance(event.data, AgentResponseUpdate):
+        print(event.data, end="")
+    elif event.type == "request_info":
+        # Human-in-the-loop: inspect event.data for function_approval_request
+        response = HandoffAgentUserRequest.create_response("Approved")
+        async for e in workflow.run(responses=[response], stream=True):
+            ...
+```
+
+### `GroupChatBuilder`
+
+```python
+from agent_framework.orchestrations import GroupChatBuilder, GroupChatState
+
+# Round-robin selection
+def round_robin(state: GroupChatState) -> str:
+    participants = state.participants
+    idx = len(state.history) % len(participants)
+    return participants[idx]
+
+# Termination condition
+def terminate_after_rounds(state: GroupChatState) -> bool:
+    return len(state.history) >= 6  # 2 rounds × 3 agents
+
+workflow = (
+    GroupChatBuilder(
+        participants=[analyst, researcher, writer],
+        selection_func=round_robin,
+        termination_condition=terminate_after_rounds,
+    )
+    .build()
+)
+
+# Streaming
+async for event in workflow.run("Research topic", stream=True):
+    if event.type == "data" and isinstance(event.data, AgentResponseUpdate):
+        print(f"[{event.data.author_name}]: {event.data}", end="")
+    elif event.type == "output" and isinstance(event.data, list):
+        # Final conversation history
+        for msg in event.data:
+            print(f"{msg.author_name}: {msg.text}")
+```
+
+#### GroupChatBuilder with Orchestrator Agent
+
+```python
+# Use an LLM agent to select the next speaker
+workflow = (
+    GroupChatBuilder(
+        participants=[analyst, researcher, writer],
+        orchestrator_agent=moderator_agent,  # Agent decides next speaker
+        termination_condition=terminate_condition,
+    )
+    .build()
+)
+```
 
 ### `MagenticBuilder` → Custom Orchestrator Executor
 
@@ -447,20 +581,6 @@ No direct replacement. Build a custom `Executor` that:
 - Plans via an orchestrator agent
 - Optionally emits `request_info` events for human approval
 - Dispatches to sub-agents and aggregates results
-
-### `HandoffBuilder` → Custom Handoff Executor
-
-No direct replacement. Build a custom `Executor` that:
-- Routes to agents based on intent/context
-- Tracks active agent and handles transfers
-- Uses `@tool` with `approval_mode` for approval flows
-
-### `GroupChatBuilder` → Custom Group Chat Executor
-
-No direct replacement. Build a custom `Executor` that:
-- Manages speaker selection (round-robin, agent-based, or custom function)
-- Maintains shared conversation state across participants
-- Enforces termination conditions and max rounds
 
 ---
 
@@ -492,4 +612,9 @@ All deprecated `AzureOpenAI*` wrappers live in a single file in the `agent-frame
 - [ ] Replace `run_stream(msg)` → `run(msg, stream=True)`
 - [ ] Replace `send_responses_streaming(r)` → `run(responses=r, stream=True)`
 - [ ] Replace individual event classes → `WorkflowEvent` with `.type` checks
-- [ ] Replace removed builders with custom `Executor` subclasses
+- [ ] Use `GroupChatBuilder` / `HandoffBuilder` from `agent_framework.orchestrations`
+- [ ] Handler signature: `(self, message: T, context: WorkflowContext)` — message FIRST
+- [ ] `FoundryAgent` import from `agent_framework.foundry` (NOT `agent_framework.azure`)
+- [ ] Include `project_endpoint` parameter for `FoundryAgent`
+- [ ] Add `client_type=FoundryAgentChatClient` workaround for rc6 function tools
+- [ ] Use `agent.run(query, stream=True)` (NOT `agent.run_stream()`)
