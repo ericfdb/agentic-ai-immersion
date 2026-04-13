@@ -18,8 +18,9 @@
 - [🚀 Getting Started](#-getting-started)
   - [Required Azure RBAC Roles](#step-5-required-azure-rbac-roles)
 - [📚 Learning Path](#-learning-path)
-- [� Industry Use Cases](#-industry-use-cases)
-- [�🛠️ Troubleshooting & Support](#️-troubleshooting--support)
+- [💼 Industry Use Cases](#-industry-use-cases)
+- [🛠️ Bring Your Own Use Case](#️-bring-your-own-use-case)
+- [🛠️ Troubleshooting & Support](#️-troubleshooting--support)
 - [🤝 Community & Contributions](#-community--contributions)
 
 ---
@@ -84,6 +85,10 @@ agentic-ai-immersion-day/
 │       ├── main.py                            # Agent implementation
 │       ├── Dockerfile                         # Container definition
 │       └── requirements.txt                   # Agent dependencies
+│
+├── 🧩 byouc/                                   # Bring Your Own Use Case
+│   ├── Agentic_UseCase_Spec.md                # Use case spec template (Markdown)
+│   └── Agentic_UseCase_Spec.docx              # Use case spec template (Word)
 │
 ├── 🐳 .devcontainer/                          # Dev Container configuration
 │   └── devcontainer.json                      # Container settings
@@ -347,6 +352,41 @@ Comprehensive evaluation, observability, and security testing for AI agents.
 ## 💼 Industry Use Cases
 
 For 49 real-world FSI use cases (banking, insurance, investment) mapped to each notebook, see [💼 USE-CASES.md](USE-CASES.md).
+
+---
+
+## 🛠️ Bring Your Own Use Case
+
+**Location:** `byouc/`
+
+Have your own agent idea? Use the **Agentic Use Case Spec** template to define your use case, then let GitHub Copilot scaffold the entire agent MVP for you.
+
+### How It Works
+
+| Step | What You Do | What Copilot Does |
+|------|-------------|-------------------|
+| **Fill** | Complete the spec template (~10 min) — describe your agent's inputs, steps, outputs, rules, and test data | — |
+| **Plan** | Paste the spec into Copilot **Plan mode** with the provided prompt | Generates a detailed implementation plan: folder structure, modules, agent definitions, workflow design |
+| **Build** | Paste the plan into Copilot **Agent mode** with the provided prompt | Implements all code, tests, and documentation matching existing repo patterns |
+
+### The Spec Template Covers
+
+1. **Use Case Summary** — what the agent does and what problem it solves
+2. **Input** — data type, structure, and size
+3. **Agent Steps** — the tools your agent will use (step-by-step)
+4. **Output** — expected format and severity/category levels
+5. **Behavior Rules** — MUST and MUST NOT constraints
+6. **Domain Context** — key terms and agent persona
+7. **Preferences** — Notebook or Web app UI
+8. **Synthetic Data Requirements** — test data spec (Copilot generates the data)
+
+### Get Started
+
+- 📄 **Markdown** → [byouc/Agentic_UseCase_Spec.md](byouc/Agentic_UseCase_Spec.md)
+- 📝 **Word** → [byouc/Agentic_UseCase_Spec.docx](byouc/Agentic_UseCase_Spec.docx)
+
+> **Includes a complete example** (Loan Application Risk Reviewer) so you can see exactly what a filled-out spec looks like.
+
 
 ---
 
