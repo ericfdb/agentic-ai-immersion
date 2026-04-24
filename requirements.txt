@@ -4,15 +4,13 @@
 #
 #    pip-compile --allow-unsafe --output-file=requirements.txt --strip-extras requirements.in
 #
-agent-framework-azure-ai==1.0.0rc6
+agent-framework-azure-ai==1.0.0b260116
     # via -r requirements.in
-agent-framework-core==1.0.0rc6
+agent-framework-core==1.0.0b260116
     # via
     #   agent-framework-azure-ai
     #   agent-framework-redis
-agent-framework-foundry==1.0.0rc6
-    # required for FoundryAgent imports
-agent-framework-redis==1.0.0b260330
+agent-framework-redis==1.0.0b260116
     # via -r requirements.in
 aiohappyeyeballs==2.6.1
     # via aiohttp
@@ -51,7 +49,7 @@ attrs==25.4.0
     #   referencing
 azure-ai-agents==1.2.0b5
     # via agent-framework-azure-ai
-azure-ai-projects==2.0.1
+azure-ai-projects==2.0.0b3
     # via
     #   -r requirements.in
     #   agent-framework-azure-ai
@@ -427,10 +425,9 @@ opentelemetry-util-http==0.60b0
     #   opentelemetry-instrumentation-urllib
     #   opentelemetry-instrumentation-urllib3
     #   opentelemetry-instrumentation-wsgi
-packaging==24.2
+packaging==25.0
     # via
     #   agent-framework-core
-    #   agent-framework-openai
     #   ipykernel
     #   jupyter-events
     #   jupyter-server
