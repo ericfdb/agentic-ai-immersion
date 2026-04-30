@@ -2,6 +2,9 @@
 
 # TODO: implement after completing lab 2
 
+# Click data + indexes from left sidebar in ai.azure.com
+#
+
 
 def main():
     raise NotImplementedError("Complete lab 2 first")

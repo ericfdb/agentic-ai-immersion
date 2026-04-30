@@ -1,9 +1,10 @@
 """Lab 1: Financial Services Advisor — agent basics."""
 
-from .client import get_project_client
-from .agent import create_agent, ask
+from labs.agent import ask, create_agent
+from labs.client import get_project_client
 
 INSTRUCTIONS = """
+Version 3 instructions
 You are a friendly AI Financial Services Advisor for a retail bank.
 You provide general information about banking products, loans, and financial services, but always:
 1. Include regulatory and financial disclaimers.
@@ -25,11 +26,13 @@ def main():
     client = get_project_client()
     print("Connected to Azure AI Foundry")
 
-    advisor = create_agent(client, "financial-services-advisor", INSTRUCTIONS)
+    advisor = create_agent(
+        client, "financial-services-advisor-testinglab1", INSTRUCTIONS
+    )
     print(f"Created agent: {advisor.name} v{advisor.version}")
 
     for q in QUESTIONS:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Q: {q}\n")
         answer = ask(client, advisor, q)
         print(f"A: {answer}")
@@ -37,3 +40,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # List your agents by running the list_agents script check pyproject scripts.
+    # content based, if something about your agent changes the version automatically gets bumped.

@@ -263,4 +263,4 @@ logs/
 *.backup
 .cache/
 tmp/
-temp/
+temp/.playwright-mcp/

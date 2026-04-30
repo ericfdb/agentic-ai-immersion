@@ -13,15 +13,15 @@ dependencies = [
 ]
 
 [project.scripts]
-lab01 = "labs.lab01_basics:main"
-lab02 = "labs.lab02_code_interpreter:main"
-lab03 = "labs.lab03_file_search:main"
-lab04 = "labs.lab04_bing_grounding:main"
-lab05 = "labs.lab05_ai_search:main"
-lab06 = "labs.lab06_multi_agent:main"
-lab07 = "labs.lab07_mcp_tools:main"
-lab08 = "labs.lab08_foundry_iq:main"
-lab09 = "labs.lab09_agent_memory:main"
+list-agents = "labs.list_agents:main"
+list-vector-stores = "labs.list_vector_stores:main"
+agents-lab01 = "labs.agents.lab01_basics:main"
+agents-lab02 = "labs.agents.lab02_code_interpreter:main"
+agents-lab03 = "labs.agents.lab03_file_search:main"
+obs-lab01 = "labs.observability.lab01_telemetry:main"
+obs-lab02 = "labs.observability.lab02_agent_evaluation:main"
+obs-lab03 = "labs.observability.lab03_function_tools_eval:main"
+hosted-lab01 = "labs.hosted.lab01_hosted_agents:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
