@@ -2,33 +2,30 @@
 name = "agentic-ai-immersion"
 version = "0.1.0"
 description = "Agentic AI Immersion Workshop — lean setup for hands-on labs"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 
 dependencies = [
-    # Lab 1: Azure AI Agents basics
     "azure-ai-projects>=2.0.0b1",
     "azure-identity>=1.15.0",
+    "azure-search-documents>=11.7.0b2",
     "python-dotenv>=1.0.0",
-    # Jupyter kernel so notebooks can run
     "ipykernel>=6.29.0",
 ]
 
-[project.optional-dependencies]
-# Install progressively as you reach later labs
-search = [
-    "azure-search-documents>=11.7.0b2",
-    "azure-mgmt-core>=1.4.0",
-]
-agent-framework = [
-    "agent-framework-azure-ai",
-    "agent-framework-redis",
-]
-observability = [
-    "azure-monitor-opentelemetry>=1.6.0",
-    "opentelemetry-api>=1.20.0",
-    "opentelemetry-sdk>=1.20.0",
-    "opentelemetry-exporter-otlp>=1.20.0",
-]
-all = [
-    "agentic-ai-immersion[search,agent-framework,observability]",
-]
+[project.scripts]
+lab01 = "labs.lab01_basics:main"
+lab02 = "labs.lab02_code_interpreter:main"
+lab03 = "labs.lab03_file_search:main"
+lab04 = "labs.lab04_bing_grounding:main"
+lab05 = "labs.lab05_ai_search:main"
+lab06 = "labs.lab06_multi_agent:main"
+lab07 = "labs.lab07_mcp_tools:main"
+lab08 = "labs.lab08_foundry_iq:main"
+lab09 = "labs.lab09_agent_memory:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.uv]
+package = true
+prerelease = "if-necessary-or-explicit"
