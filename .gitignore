@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Devcontainer auto-generated lock
+.devcontainer/devcontainer-lock.json
+
 # =============================================================================
 # 🔐 SENSITIVE FILES - NEVER COMMIT
 # =============================================================================
