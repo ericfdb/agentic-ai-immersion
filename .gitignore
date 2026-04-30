@@ -193,9 +193,8 @@ ehthumbs.db
 Desktop.ini
 
 # =============================================================================
-# 🔒 LOCKS (regenerated on install)
+# 🔒 JS LOCK FILES (regenerated on install)
 # =============================================================================
-*.lock
 pnpm-lock.yaml
 yarn.lock
 package-lock.json

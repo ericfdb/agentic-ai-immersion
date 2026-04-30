@@ -1,7 +1,7 @@
 # 🚀 Agentic AI Immersion Workshop
 
 [![Microsoft Foundry](https://img.shields.io/badge/Microsoft-Foundry-blue?style=for-the-badge&logo=microsoft)](https://ai.azure.com)
-[![Python](https://img.shields.io/badge/Python-3.10+-green?style=for-the-badge&logo=python)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-green?style=for-the-badge&logo=python)](https://python.org)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Lab-orange?style=for-the-badge&logo=jupyter)](https://jupyter.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
@@ -49,53 +49,33 @@ This comprehensive workshop transforms you from an AI enthusiast into a Microsof
 ## 📁 Repository Structure
 
 ```
-agentic-ai-immersion-day/
+agentic-ai-immersion/
 │
-├── 🤖 azure-ai-agents/                        # Azure AI Agents SDK
-│   ├── 1-basics.ipynb                         # Agent fundamentals
-│   ├── 2-code-interpreter.ipynb               # Code execution
-│   ├── 3-file-search.ipynb                    # Document Q&A
-│   ├── 4-bing-grounding.ipynb                 # Web search integration
-│   ├── 5-agents-aisearch.ipynb                # Enterprise search
-│   ├── 6-multi-agent-solution-with-workflows.ipynb
-│   ├── 7-mcp-tools.ipynb                      # MCP integration
-│   ├── 8-foundry-IQ-agents.ipynb              # 🧠 Foundry IQ - Agentic retrieval
-│   └── 9-agent-memory-search.ipynb            # Memory patterns
+├── src/labs/                                    # Python lab scripts (run with uv)
+│   ├── client.py                              # Shared Azure AI client setup
+│   ├── agent.py                               # Reusable agent helpers
+│   ├── lab01_basics.py – lab09_agent_memory.py
 │
-├── 🤖⚙️ agent-framework/                       # Microsoft Agent Framework (Business use cases)
-│   ├── agents/azure-ai-agents/                # 9 agent notebooks (1-9)
-│   ├── context-providers/                     # 2 context/memory notebooks (1-2)
-│   ├── middleware/                            # 9 interception patterns (1-9)
-│   ├── observability/                         # 3 telemetry notebooks (1-3)
-│   ├── threads/                               # 3 persistence notebooks (1-3)
-│   └── workflows/                             # 9 orchestration notebooks (1-9)
+├── azure-ai-agents/                            # Jupyter notebooks (follow-along)
+│   ├── 1-basics.ipynb – 9-agent-memory-search.ipynb
 │
-├── 📊 observability-and-evaluations/          # Evaluation & Security
-│   ├── 1-telemetry.ipynb                      # Azure Monitor telemetry
-│   ├── 2-agent-evaluation.ipynb               # Built-in evaluators
-│   ├── 3-agent-evaluation-with-function-tools.ipynb
-│   ├── 4-tool-call-accuracy-evaluation.ipynb  # Tool accuracy
-│   └── 5-red-team-security-testing.ipynb      # Security testing
+├── agent-framework/                            # Microsoft Agent Framework deep-dive
+│   ├── agents/azure-ai-agents/                # 9 agent notebooks
+│   ├── context-providers/                     # 2 context/memory notebooks
+│   ├── middleware/                             # 9 interception patterns
+│   ├── observability/                         # 3 telemetry notebooks
+│   ├── threads/                               # 3 persistence notebooks
+│   └── workflows/                             # 9 orchestration notebooks
 │
-├── 🚀 hosted-agents/                          # Hosted Agent Deployment
-│   ├── azure.yaml                             # azd project configuration
-│   ├── README.md                              # Deployment guide
-│   └── src/WebSearchAgent/                    # Web search agent
-│       ├── agent.yaml                         # Agent definition
-│       ├── main.py                            # Agent implementation
-│       ├── Dockerfile                         # Container definition
-│       └── requirements.txt                   # Agent dependencies
+├── observability-and-evaluations/              # Evaluation & Security
+│   ├── 1-telemetry.ipynb – 5-red-team-security-testing.ipynb
 │
-├── 🧩 byouc/                                   # Bring Your Own Use Case
-│   ├── Agentic_UseCase_Spec.md                # Use case spec template (Markdown)
-│   └── Agentic_UseCase_Spec.docx              # Use case spec template (Word)
-│
-├── 🐳 .devcontainer/                          # Dev Container configuration
-│   └── devcontainer.json                      # Container settings
+├── hosted-agents/                              # Hosted Agent Deployment (azd)
+├── byouc/                                      # Bring Your Own Use Case templates
 │
 ├── .env.example                               # Environment template
-├── requirements.in                            # Unpinned dependencies
-├── requirements.txt                           # Pinned dependencies (pip-compile)
+├── pyproject.toml                             # Dependencies (managed by uv)
+├── uv.lock                                    # Pinned lockfile (committed)
 └── README.md                                  # This file
 ```
 
@@ -103,50 +83,34 @@ agentic-ai-immersion-day/
 
 ## 🚀 Getting Started
 
-### Option A: Dev Container (Recommended) 🐳
+### Prerequisites
 
-For a consistent, pre-configured environment with all dependencies:
+- [Python 3.11+](https://python.org)
+- [uv](https://docs.astral.sh/uv/) — fast Python package manager (`pip install uv` or `winget install astral-sh.uv`)
+- Visual Studio 2022 (or any editor with Python/Jupyter support)
 
-1. **Prerequisites**: Install [Docker](https://docker.com) and [VS Code](https://code.visualstudio.com) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-
-2. **Open in Container**:
-   - Clone the repo and open in VS Code
-   - Press `F1` → **Dev Containers: Reopen in Container**
-   - Wait for the container to build (first time takes ~5 minutes)
-
-3. **Ready to go!** All dependencies are pre-installed including:
-   - Python 3.12 with all packages (frozen versions)
-   - Azure CLI and Azure Developer CLI (azd)
-   - Jupyter notebooks support
-   - GitHub Copilot extensions
-
-> 💡 **Tip:** Your Azure credentials are automatically mounted from your local machine.
-
-### Option B: Local Setup
-
-#### Step 1: Repository Setup
+### Step 1: Clone and Install
 
 ```powershell
-# Clone the repository
-git clone https://github.com/dhangerkapil/agentic-ai-immersion-day.git
-cd agentic-ai-immersion-day
+git clone <your-fork-url>
+cd agentic-ai-immersion
 
-# Verify Python version
-python --version  # Python 3.10+ required
+# Install all dependencies (creates .venv automatically)
+uv sync
 ```
 
-#### Step 2: Environment Setup
+### Step 2: Run a Lab
 
 ```powershell
-# Create and activate virtual environment
-python -m venv .venv
-.\.venv\Scripts\activate
+# Run any lab as a script
+uv run lab01    # Agent basics
+uv run lab02    # Code interpreter
+# ... through lab09
 
-# Install dependencies (versions are pinned for consistency)
-pip install -r requirements.txt
+# Or open the Jupyter notebooks in azure-ai-agents/
 ```
 
-#### Step 3: Configure Environment Variables
+### Step 3: Configure Environment Variables
 
 1. Copy `.env.example` to `.env`
 2. Update with your Azure resources:
@@ -396,10 +360,9 @@ Have your own agent idea? Use the **Agentic Use Case Spec** template to define y
 
 | Issue | Solution |
 |-------|----------|
-| **Kernel Issues** | `python -m ipykernel install --user --name=ai-foundry-lab` then reload VS Code |
-| **Environment Activation** | `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` |
-| **Azure Authentication** | `az login --tenant YOUR_TENANT_ID` (Azure CLI preferred over VS Code extension) |
-| **Package Import Errors** | Ensure `agent-framework` packages installed in same interpreter as Jupyter |
+| **Dependencies out of sync** | `uv sync` — recreates .venv from lockfile |
+| **Azure Authentication** | `az login --tenant YOUR_TENANT_ID` |
+| **Role Propagation** | RBAC assignments can take 5-10 minutes to propagate |
 | **Redis Connectivity** | Update connection string and confirm service is reachable |
 | **Application Insights Delay** | Use Live Metrics Stream for real-time debugging |
 
@@ -425,7 +388,7 @@ Have your own agent idea? Use the **Agentic Use Case Spec** template to define y
 | 💡 **Feature Requests** | Suggest new capabilities |
 | 🔄 **Pull Requests** | Contribute code and enhancements |
 
-Please review our [Contributing Guide](CONTRIBUTING.md) for code style, testing requirements, and PR process.
+Feel free to open issues or pull requests.
 
 ---
 
